@@ -5,6 +5,7 @@ import os.path
 from PyPDF2 import PdfFileReader, PdfFileWriter
 import time
 import glob
+import tkinter.filedialog
 
 def getFileName(filepath):
 
@@ -69,4 +70,46 @@ def MergePDFWithStep(filepath, outfile, step):
     print('总共耗时： %.4f s' % (time2 - time1))
 
 if __name__ == "__main__":  #这里可以判断，当前文件是否是直接被python调用执行
-    MergePDFWithStep('C:/Users/soy/Desktop/tmp/dist/',"判断",10)
+    '''
+    reference：https://www.cnblogs.com/shwee/p/9427975.html
+    '''
+    # 第1步，实例化object，建立窗口window
+    window = tkinter.Tk()
+
+    # 第2步，给窗口的可视化起名字
+    window.title('一番码客 - PDF合并软件')
+
+    # 第3步，设定窗口的大小(长 * 宽)
+    window.geometry('500x300')  # 这里的乘是小x
+
+    # 第4步，在图形界面上设定输入框控件entry框并放置
+    tkinter.Label(window, text='输入合并后的文档名', bg='red', font=('Arial', 16)).pack()
+    e = tkinter.Entry(window, show=None)  # 显示成明文形式
+    e.pack()
+
+    # 第5步，获取路径和命名
+    def getFolder():
+        pdfFolder = tkinter.filedialog.askdirectory() + '/'
+        var.set(pdfFolder)
+
+    def startMerge():
+        pdfFolder = var.get()
+        mergedName = e.get()
+        MergePDFWithStep(pdfFolder, mergedName, 10)
+
+    # 第6步，创建并放置两个按钮分别触发两种情况
+    tkinter.Button(window, text='选择要合并的pdf所在文件夹', width=40, height=2, command=getFolder).pack()
+
+    # 第7步，创建并放置一个多行文本框text用以显示，指定height=3为文本框是三个字符高度
+    var = tkinter.StringVar()  # 将label标签的内容设置为字符类型，用var来接收hit_me函数的传出内容用以显示在标签上
+    l = tkinter.Label(window, textvariable=var, bg='green', fg='white', font=('Arial', 12), width=30, height=2)
+    # 说明： bg为背景，fg为字体颜色，font为字体，width为长，height为高，这里的长和高是字符的长和高，比如height=2,就是标签有2个字符这么高
+    l.pack()
+
+    b2 = tkinter.Button(window, text='开始合并', width=10, height=2, command=startMerge)
+    b2.pack()
+
+    # 第8步，主窗口循环显示
+    window.mainloop()
+
+

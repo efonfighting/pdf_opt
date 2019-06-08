@@ -6,14 +6,21 @@ from PyPDF2 import PdfFileReader, PdfFileWriter
 import time
 import glob
 import tkinter.filedialog
+import tkinter.messagebox
+from tkinter import *    #注意模块导入方式，否则代码会有差别
+'''
+reference:
+    打包exe: ' pyinstaller -F pdfmerge.py -w -i assert/efon.ico --version-file=assert/file_version_info.txt'
+    info：C:/Users/xxx/AppData/Local/Programs/Python/Python37/Lib/site-packages/PyInstaller/utils/cliutils
+    tkinter：https://www.cnblogs.com/shwee/p/9427975.html
+    tkinter 消息框：https://www.cnblogs.com/buchizaodian/p/7076964.html
+'''
 
 def getFileName(filepath):
-
     file_list = sorted(glob.glob("{}*.pdf".format(filepath) ),key=os.path.getmtime, reverse=False)
     # 默认安装字典序排序，也可以安装自定义的方式排序
     # file_list.sort()
     return file_list
-
 
 ##########################合并filepath文件夹下所有PDF文件########################
 def MergePDF(filepath, fileNameList, outfile):
@@ -50,7 +57,7 @@ def MergePDF(filepath, fileNameList, outfile):
 
     print("All Pages Number: " + str(outputPages))
     # 最后写pdf文件
-    outputStream = open(filepath + outfile, "wb")
+    outputStream = open(outfile, "wb")
     output.write(outputStream)
     outputStream.close()
     print("finished")
@@ -70,44 +77,60 @@ def MergePDFWithStep(filepath, outfile, step):
     print('总共耗时： %.4f s' % (time2 - time1))
 
 if __name__ == "__main__":  #这里可以判断，当前文件是否是直接被python调用执行
-    '''
-    reference：https://www.cnblogs.com/shwee/p/9427975.html
-    '''
+    # 第5步，获取路径和命名
+    def getFolder():
+        pdfFolder = tkinter.filedialog.askdirectory()
+        var.set(pdfFolder)
+
+    def startMerge():
+        pdfFolder = var.get() + '\\'
+        #mergedName = e.get()
+        mergedName = tkinter.filedialog.asksaveasfilename(filetypes=[("PDF",".pdf")])
+        print(mergedName)
+        MergePDFWithStep(pdfFolder, mergedName, 500)
+
     # 第1步，实例化object，建立窗口window
     window = tkinter.Tk()
 
     # 第2步，给窗口的可视化起名字
-    window.title('一番码客 - PDF合并软件')
+    title = '一番码客 - PDF合并软件 - V_0.0.1'
+    window.title(title)
 
     # 第3步，设定窗口的大小(长 * 宽)
-    window.geometry('500x300')  # 这里的乘是小x
+    window.geometry('800x100')  # 这里的乘是小x
 
+    '''
     # 第4步，在图形界面上设定输入框控件entry框并放置
-    tkinter.Label(window, text='输入合并后的文档名', bg='red', font=('Arial', 16)).pack()
-    e = tkinter.Entry(window, show=None)  # 显示成明文形式
-    e.pack()
+    fm1 = Frame(window)
+    tkinter.Label(fm1, text='输入合并后的文档名:', font=('Arial', 16)).pack(side=LEFT)
 
-    # 第5步，获取路径和命名
-    def getFolder():
-        pdfFolder = tkinter.filedialog.askdirectory() + '/'
-        var.set(pdfFolder)
+    e = tkinter.Entry(fm1, show=None, font=('Arial', 16))  # 显示成明文形式
+    e.pack(side=TOP, anchor=W, fill=X, expand=YES)
 
-    def startMerge():
-        pdfFolder = var.get()
-        mergedName = e.get()
-        MergePDFWithStep(pdfFolder, mergedName, 10)
+    fm1.pack(side=TOP, fill=BOTH, expand=YES)
+    '''
+    def show_me():
+        tkinter.messagebox.showinfo(title,'联系我:\n\n'
+                                          '微信公众号【一番码客】:发掘你关心的亮点!\n\n'
+                                          '微信【Efon-fighting】:请备注(一番工具)!\n\n'
+                                          '邮箱【efongfighting@126.com】')
+
+    about = tkinter.Menu(window)
+    about.add_command(label='about', command=show_me)
+    window.config(menu=about)
 
     # 第6步，创建并放置两个按钮分别触发两种情况
-    tkinter.Button(window, text='选择要合并的pdf所在文件夹', width=40, height=2, command=getFolder).pack()
-
+    fm2 = Frame(window)
+    tkinter.Button(fm2, text='选择要合并的pdf所在文件夹', font=('Arial', 14), command=getFolder).pack(side=LEFT)
     # 第7步，创建并放置一个多行文本框text用以显示，指定height=3为文本框是三个字符高度
     var = tkinter.StringVar()  # 将label标签的内容设置为字符类型，用var来接收hit_me函数的传出内容用以显示在标签上
-    l = tkinter.Label(window, textvariable=var, bg='green', fg='white', font=('Arial', 12), width=30, height=2)
+    l = tkinter.Label(fm2, textvariable=var, font=('Arial', 12)).pack(side=LEFT)
     # 说明： bg为背景，fg为字体颜色，font为字体，width为长，height为高，这里的长和高是字符的长和高，比如height=2,就是标签有2个字符这么高
-    l.pack()
+    fm2.pack(side=TOP, fill=BOTH, expand=YES)
 
-    b2 = tkinter.Button(window, text='开始合并', width=10, height=2, command=startMerge)
-    b2.pack()
+    fm3 = Frame(window)
+    b2 = tkinter.Button(fm3, text='开始合并', font=('Arial', 14), command=startMerge).pack(side=LEFT)
+    fm3.pack(side=TOP, fill=BOTH, expand=YES)
 
     # 第8步，主窗口循环显示
     window.mainloop()

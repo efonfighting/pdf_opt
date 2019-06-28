@@ -77,7 +77,7 @@ def MergePDFWithStep(filepath, outfile, step):
     print('总共耗时： %.4f s' % (time2 - time1))
 
 if __name__ == "__main__":  #这里可以判断，当前文件是否是直接被python调用执行
-    # 第5步，获取路径和命名
+    # 获取路径和命名
     def getNameFiles():
         pdfFiles = tkinter.filedialog.askopenfilenames()
         print(pdfFiles)
@@ -92,8 +92,9 @@ if __name__ == "__main__":  #这里可以判断，当前文件是否是直接被
         filePath = os.path.dirname(fileList[0])
         MergePDF(filePath, fileList, mergedName+'.pdf')
 
-    # 第1步，实例化object，建立窗口window
+    # 第1步，实例化object，建立窗口window，并替换图标
     window = tkinter.Tk()
+    window.iconbitmap("C:\\Users\\soy\\PycharmProjects\\pdf_opt\\assert\\efon.ico") # 注意绝对路径和转义字符
 
     # 第2步，给窗口的可视化起名字
     title = '一番码客 - PDF合并软件 - V_0.0.1'
@@ -122,7 +123,7 @@ if __name__ == "__main__":  #这里可以判断，当前文件是否是直接被
     about.add_command(label='help', command=help)
     window.config(menu=about)
 
-    # 第6步，创建并放置两个按钮分别触发两种情况
+    # 第4步，创建并放置两个按钮分别触发两种情况
     fm2 = Frame(window)
     tkinter.Button(fm2, text='选择要合并的PDF文档', font=('Arial', 14), command=getNameFiles).pack(side=LEFT)
     var = tkinter.StringVar()  # 将label标签的内容设置为字符类型，用var来接收hit_me函数的传出内容用以显示在标签上
@@ -140,7 +141,7 @@ if __name__ == "__main__":  #这里可以判断，当前文件是否是直接被
     b2 = tkinter.Button(fm4, text='开始合并', font=('Arial', 14), command=startMerge).pack(side=LEFT)
     fm4.pack(side=TOP, fill=BOTH, expand=YES)
 
-    # 第8步，主窗口循环显示
+    # 第5步，主窗口循环显示
     window.mainloop()
 
 

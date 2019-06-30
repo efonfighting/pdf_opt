@@ -94,7 +94,7 @@ if __name__ == "__main__":  #这里可以判断，当前文件是否是直接被
 
     # 第1步，实例化object，建立窗口window，并替换图标
     window = tkinter.Tk()
-    window.iconbitmap("C:\\Users\\soy\\PycharmProjects\\pdf_opt\\assert\\efon.ico") # 注意绝对路径和转义字符
+    window.iconbitmap(".\\assert\\efon.ico") # 注意转义字符
 
     # 第2步，给窗口的可视化起名字
     title = '一番码客 - PDF合并软件 - V_0.0.1'

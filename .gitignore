@@ -1,2 +1,8 @@
 venv
 dist
+env
+build
+dist
+*__pycache__
+.vscode
+*.spec

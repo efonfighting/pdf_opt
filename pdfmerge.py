@@ -14,6 +14,7 @@ from asset.efon import Efon
 import base64
 import webbrowser
 from PIL import Image, ImageTk
+import pdfkit
 
 
 def getFileName(filepath):
@@ -22,83 +23,38 @@ def getFileName(filepath):
     # file_list.sort()
     return file_list
 
-##########################合并filepath文件夹下所有PDF文件########################
-def MergePDF(filepath, fileNameList, outfile):
-    output = PdfFileWriter()
-    outputPages = 0
-
-    for each_file in fileNameList:
-        print("adding %s" % each_file)
-        # 读取源pdf文件
-        try:
-            input = PdfFileReader(open(each_file, "rb"))
-        except:
-            print("{} is a bad pdf, skip it.".format(each_file))
-            continue
-
-        # 如果pdf文件已经加密，必须首先解密才能使用pyPdf
-        if input.isEncrypted == True:
-            input.decrypt("map")
-
-        # print(each_file[:-4])
-
-        # 获得源pdf文件中页面总数
-        pageCount = input.getNumPages()
-        outputPages += pageCount
-        #print("%s has %d pages" % (each_file, pageCount))
-
-        # 分别将page添加到输出output中
-        for iPage in range(pageCount):
-            output.addPage(input.getPage(iPage))
-
-        # 添加书签
-        output.addBookmark(
-            title=each_file[:-3].replace(filepath+'/',''), pagenum=outputPages - pageCount)
-
-    print("All Pages Number: " + str(outputPages))
-    # 最后写pdf文件
-    outputStream = open(outfile, "wb")
-    output.write(outputStream)
-    outputStream.close()
-    print("finished")
-
-
-def MergePDFWithStep(filepath, outfile, step):
-    print('{}:{}:{}'.format(filepath, outfile, step))
-    time1 = time.time()
-    file_dir = '.'
-    pdf_fileName = getFileName(filepath)
-    fileCnt = len(pdf_fileName)
-    mergeCnt = int(fileCnt / step)
-    for i in range(mergeCnt):
-        MergePDF(filepath, pdf_fileName[i*step:(i+1)*step],"{}_{}_{}.pdf".format(outfile,i*step+1,(i+1)*step))
-    MergePDF(filepath, pdf_fileName[mergeCnt*step:],"{}_{}_{}.pdf".format(outfile,mergeCnt*step+1,fileCnt))
-    time2 = time.time()
-    print('总共耗时： %.4f s' % (time2 - time1))
-
 if __name__ == "__main__":  #这里可以判断，当前文件是否是直接被python调用执行
+    exeFile = ''
     # 获取路径和命名
-    def getNameFiles():
-        pdfFiles = tkinter.filedialog.askopenfilenames()
-        print(pdfFiles)
-        for index in range(0, len(pdfFiles), 1):
-            t1.insert('insert', pdfFiles[index]+'\n')
-        print(t1.get("1.0", "400.end"))
+    def getNameFile():
+        global exeFile
+        exeFile = tkinter.filedialog.askopenfilename(filetypes=[("EXE",".exe")])
+        print(exeFile)
+        L0.config(text=exeFile + '\n', font=("宋体", 12))
 
-    def startMerge():
-        mergedName = tkinter.filedialog.asksaveasfilename(filetypes=[("PDF",".pdf")])
-        print(mergedName)
-        fileList = t1.get("1.0", "400.end").split('\n') # 最多400个
-        filePath = os.path.dirname(fileList[0])
-        MergePDF(filePath, fileList, mergedName+'.pdf')
-
+    # 获取保存路径
+    def startDownload():
+        print(exeFile)
+        print(exeFile.find('wkhtmltopdf.exe'))
+        if(exeFile.find('wkhtmltopdf.exe') == -1):
+            tkinter.messagebox.showinfo(title,'请选择正确的wkhtmltopdf.exe路径')
+            return False
+        tkinter.messagebox.showinfo(title,'请选择下载文档所要保存的目录！')
+        saveDir = tkinter.filedialog.askdirectory()
+        print(saveDir)
+        urls = t1.get("1.0", "20.end").split('\n')
+        print(urls)
+        config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files\wkhtmltopdf\\bin\wkhtmltopdf.exe')
+        for idx,url in enumerate(urls):
+            print(str(idx) + '.pdf : ' + url)
+            pdfkit.from_url(url, saveDir + '{}.pdf'.format(idx), configuration=config)
 
     # 第1步，实例化object，建立窗口window
     window = tkinter.Tk()
     
     # 第2步，给窗口的可视化起名字
-    version= 'V_1.1.1' #版本规则：框架改动.功能改动.问题修复
-    title = '一番码客 - PDF合并软件 - ' + version
+    version= 'V_0.0.1' #版本规则：框架改动.功能改动.问题修复
+    title = '一番码客 - 批量网页转PDF - ' + version
     window.title(title)
     window.resizable(0, 0)# 设置窗口宽高固定，如果放到geometry后面会闪一下
 
@@ -138,8 +94,19 @@ if __name__ == "__main__":  #这里可以判断，当前文件是否是直接被
     tab.select(frame1)
     
     # ---------第1页---------
+    fram1_fm0 = Frame(frame1)
+    tkinter.Button(fram1_fm0, text='选择wkhtmltopdf.exe所在位置', bg="#BC8F8F", font=('Arial', 14), command=getNameFile).pack(side=LEFT)
+    # 说明： bg为背景，fg为字体颜色，font为字体，width为长，height为高，这里的长和高是字符的长和高，比如height=2,就是标签有2个字符这么高
+    fram1_fm0.pack(side=TOP, fill=BOTH, expand=YES)
+
+    fram1_fm01 = Frame(frame1)
+    L0 = tkinter.Label(fram1_fm01, text='', font=("华文行楷", 13), fg='blue')
+    L0.pack(side=LEFT)
+    # 说明： bg为背景，fg为字体颜色，font为字体，width为长，height为高，这里的长和高是字符的长和高，比如height=2,就是标签有2个字符这么高
+    fram1_fm01.pack(side=TOP, fill=BOTH, expand=YES)
+
     fram1_fm1 = Frame(frame1)
-    tkinter.Button(fram1_fm1, text='选择要合并的PDF文档', bg="#BC8F8F", font=('Arial', 14), command=getNameFiles).pack(side=LEFT)
+    tkinter.Label(fram1_fm1, text='请输入你想要下载的网址，每个网址换行输入，最多一次输入20个网址：', font=("华文行楷", 13), fg='blue').pack(side=LEFT)
     # 说明： bg为背景，fg为字体颜色，font为字体，width为长，height为高，这里的长和高是字符的长和高，比如height=2,就是标签有2个字符这么高
     fram1_fm1.pack(side=TOP, fill=BOTH, expand=YES)
 
@@ -149,7 +116,7 @@ if __name__ == "__main__":  #这里可以判断，当前文件是否是直接被
     fram1_fm2.pack(side=TOP, fill=BOTH, expand=YES)
 
     fram1_fm3 = Frame(frame1)
-    b2 = tkinter.Button(fram1_fm3, text='开始合并', bg="#BC8F8F", font=('Arial', 14), command=startMerge).pack(side=LEFT)
+    b2 = tkinter.Button(fram1_fm3, text='开始下载为PDF', bg="#BC8F8F", font=('宋体', 14), command=startDownload).pack(side=LEFT)
     fram1_fm3.pack(side=TOP, fill=BOTH, expand=YES)
 
     # ---------第2页---------

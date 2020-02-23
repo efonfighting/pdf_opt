@@ -150,7 +150,7 @@ class Url2pdf(object):
         frame1_fm04.grid(row=4, column=0,padx=1,pady=0,sticky=W)
 
         #frame1_fm00
-        tkinter.Label(frame1_fm00, text='请输入您想要下载的网址，每个网址换行输入，最多一次输入20个网址：', font=("华文行楷", 13), fg='blue').grid()
+        tkinter.Label(frame1_fm00, text='请输入您想要下载的网址，每个网址换行输入，一次最多可输入30个网址：', font=("华文行楷", 13), fg='blue').grid()
 
         #frame1_fm01
         self.tWebSites = tkinter.Text(frame1_fm01, height=30, width=125)
@@ -175,17 +175,24 @@ class Url2pdf(object):
         # ---------第2页---------
         funcDes =   '\n'\
                     '功能说明：\n\n'\
-                    '1.合并后的文档带目录。\n\n'\
-                    '2.最多支持400个文档的合并。\n\n'\
-                    '3.如有损坏文件，将自动跳过\n\n'\
+                    '1.输入批量网址，将网址转换为pdf保存到本地。\n\n'\
+                    '2.一次最多支持30个网址下载。\n\n'\
+                    '3.如有无法访问网址，将自动跳过。\n\n'\
                     '\n'\
                     '使用说明:\n\n'\
-                    '1.点击“选择要合并的文档”。\n\n'\
-                    '2.如果需要调整顺序，在文本框内直接编辑，请保证路径的完整性，一个文件一行。\n\n'\
-                    '3.点击“开始合并”，选择保存路径，输入合并后的文件名称。\n\n'
+                    '1.首先安装wkhtml2pdf.exe，采用默认安装即可。\n\n'\
+                    '2.请输入您想要下载的网址，每个网址换行输入。\n\n'\
+                    '3.点击“开始下载为PDF”，可以看到下载进度。 \n\n'\
+                    '4.保存路径默认为当前路径，可以点击“修改”设置为其他目录。 \n\n'\
+                    '5.如果提示“请选择正确的wkhtmltopdf.exe路径”，点击“修改”设置wkhtmltopdf.exe安装路径。\n\n'\
+                    '6.wkhtmltopdf.exe默认安装路径为C:/Program Files/wkhtmltopdf/bin/。\n\n'\
+                    '\n'\
+                    '其他说明:\n\n'\
+                    '1.版本持续升级，请点击“获取最新版本”。\n\n'\
+                    '2.有任何问题或建议，请“联系作者”。\n\n'\
 
         fram2_fm1 = Frame(frame2)
-        tkinter.Label(fram2_fm1, text=funcDes, font=("楷书", 14), justify = 'left').pack(anchor=N, side=LEFT)
+        tkinter.Label(fram2_fm1, text=funcDes, font=("楷书", 13), justify = 'left').pack(anchor=N, side=LEFT)
         fram2_fm1.pack(side=TOP, fill=BOTH, expand=YES)
 
         # ---------第3页---------
@@ -203,9 +210,12 @@ class Url2pdf(object):
         # ---------第4页---------
         versionDes =  '版本说明：\n'\
                     '========================\n'\
-                    '* 2020-02-16 V_1.1.1\n'\
-                    '  1.完善pdf合并基本功能。\n'\
-                    '  2.添加多页选项\n'\
+                    '* 2020-02-23 V_1.1.1\n'\
+                    '  1.url转PDF保存到本地。\n'\
+                    '  2.下载进度展示栏。\n'\
+                    '  3.保存目录的选择、展示、打开。\n'\
+                    '  4.获取最新版本链接。\n'\
+                    '  4.wkhtml和保存路径可保存。\n'\
                     '========================\n'
 
         fram4_fm1 = Frame(frame4)
@@ -264,7 +274,7 @@ class Url2pdf(object):
             tkinter.messagebox.showinfo(self.title,'请选择正确的wkhtmltopdf.exe路径')
             return False
         
-        urls = self.tWebSites.get("1.0", "20.end").split('\n')
+        urls = self.tWebSites.get("1.0", "30.end").split('\n')
         urls = [i for i in urls if i != ''] # 删除所有空元素
         print(urls)
         config = pdfkit.configuration(wkhtmltopdf=self.exeFile)

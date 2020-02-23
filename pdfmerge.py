@@ -12,9 +12,100 @@ from tkinter import ttk
 from asset.icon import Icon
 from asset.efon import Efon
 import base64
-import webbrowser
+import webbrowser,requests
 from PIL import Image, ImageTk
 import pdfkit
+
+
+def saveUrl(url, picName):
+    '''
+    保存url内容
+    :param url : 要保存的url
+    :param picName : 保存文件路径
+    :return : 获取到的url内容长度
+    '''
+    contLen = 0
+    try:
+        urlCont = requests.get(url, timeout=20).content
+        contLen = len(urlCont)
+
+        if (contLen == 0): # 第一次失败则再尝试一次
+            print("get url failed,try again.")
+            urlCont = requests.get(url, timeout=20).content
+            contLen = len(urlCont)
+
+        if (contLen != 0):
+            open(picName, 'wb').write(urlCont)
+            print("get url ok:", contLen)
+        else:
+            print("get url failed.")
+    except Exception:
+        print("get url Exception.")
+    return contLen
+
+def wkhUrl2pdfWindows(url, pdfName):
+    '''
+    通过(title , url)文档打印为pdf文档
+        * 为了解决wkhtmltopdf部分图片失真的问题，把网页中所有的图片保存到本地并用convert转换格式，修改html img src路径为本地相对路径
+        * 需要安装wkhtmltopdf工具，需要linux环境
+    '''
+
+    import urllib.request
+    import os,sys
+    os.chdir(sys.path[0])
+    fileDir = os.path.dirname(pdfName) #获取目录的绝对路径
+    title = pdfName.replace(fileDir + '/', '')
+
+    htmlDir = fileDir + '/html/' + title.replace('.pdf', '')
+    pdfDir = fileDir + '/pdf/'
+    if not os.path.exists(htmlDir):
+        os.mkdir(htmlDir)
+    htmlName = '{}/essay.html'.format(htmlDir)
+
+    for i in range(10): #防止访问时间过长造成假死
+        try:
+            html = open_url(url).decode("UTF-8") #read出的是bytes，使用前需要转换为str类型
+        except Exception:
+            if i >= 9:
+                print("requests failed and return.")
+                return
+            else:
+                time.sleep(1)
+        else:
+            break
+
+    pattern = re.compile(r'data-src=\"http.*?\"')  # 用?来控制正则贪婪和非贪婪匹配;(.*?) 小括号来控制是否包含匹配的关键字
+    result = pattern.findall(html)
+
+    picCnt = 0
+    for i in result:
+        picCnt = picCnt + 1
+        url = re.findall(r'\"(.*?)\"', i)[0]
+        print(picCnt, " : ", url)
+        if (len(re.findall("wx_fmt", url)) == 0): # 有可能是视频，判断是否是图片
+            print("url is not a pic")
+            continue
+
+        picName = '{}/{}.png'.format(htmlDir, str(picCnt))
+        picDir = os.path.dirname(picName)
+        picNameOnly = picName.replace(picDir+'/', '') # 转换为相对路径
+        html = html.replace(url, picNameOnly)
+        if(saveUrl(url, picName) == 0):
+            continue
+        #os.system('wget {} -O {} > /dev/null 2>&1'.format(url, picName))
+        #convertCmd = 'convert {}[0] {}'.format(picName, picName)
+        #print(convertCmd)
+        #os.system(convertCmd)
+    html = html.replace('data-src','src').replace('quotes: none;','')
+    html = html + '<a href>声明：pdf仅供学习使用，一切版权归原创公众号所有；建议持续关注原创公众号获取最新文章，学习愉快！</a>'
+    fd = open(htmlName, 'w', encoding="utf-8")
+    fd.write(html)
+    fd.close()
+
+    #os.system('wkhtmltopdf --enable-plugins --enable-forms --margin-bottom 0 --margin-top 0 {} {} > /dev/null 2>&1'.format(htmlName, pdfDir + '/' + title))
+    #os.remove(htmlName)
+    #os.system('rm {}/*.png'.format(fileDir))
+    print("下载成功")
 
 
 def getFileName(filepath):
@@ -24,43 +115,72 @@ def getFileName(filepath):
     return file_list
 
 if __name__ == "__main__":  #这里可以判断，当前文件是否是直接被python调用执行
-    exeFile = ''
-    # 获取路径和命名
-    def getNameFile():
+    exeFile = 'C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe'
+    
+    saveDir = os.getcwd()
+    # 获取wkhtmltopdf路径和命名
+    def getWkhtmlPath():
         global exeFile
         exeFile = tkinter.filedialog.askopenfilename(filetypes=[("EXE",".exe")])
         print(exeFile)
-        L0.config(text=exeFile + '\n', font=("宋体", 12))
+        lWkhtmlPath.config(text=exeFile, font=("宋体", 12))
+
+    def getSaveDir():
+        global saveDir
+        saveDir = tkinter.filedialog.askdirectory()
+        print(saveDir)
+        lSaveDir.config(text=saveDir, font=("宋体", 12))
 
     # 获取保存路径
     def startDownload():
+        global saveDir
         print(exeFile)
-        print(exeFile.find('wkhtmltopdf.exe'))
-        if(exeFile.find('wkhtmltopdf.exe') == -1):
+        print(saveDir)
+        if(os.path.exists(exeFile) and exeFile.find('wkhtmltopdf.exe')):
+            pass
+        else:
             tkinter.messagebox.showinfo(title,'请选择正确的wkhtmltopdf.exe路径')
             return False
-        tkinter.messagebox.showinfo(title,'请选择下载文档所要保存的目录！')
-        saveDir = tkinter.filedialog.askdirectory()
-        print(saveDir)
-        urls = t1.get("1.0", "20.end").split('\n')
+        
+        urls = tWebSites.get("1.0", "20.end").split('\n')
+        urls = [i for i in urls if i != ''] # 删除所有空元素
         print(urls)
-        config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files\wkhtmltopdf\\bin\wkhtmltopdf.exe')
+        config = pdfkit.configuration(wkhtmltopdf=exeFile)
+        options = {
+            #'page-size': 'A4',
+            'margin-top': '0mm',
+            'margin-right': '0mm',
+            'margin-bottom': '0mm',
+            'margin-left': '0mm',
+            # 'orientation':'Landscape',#横向
+            'encoding': "UTF-8",
+            'no-outline': None,
+            # 'footer-right':'[page]' 设置页码
+        }
         for idx,url in enumerate(urls):
-            print(str(idx) + '.pdf : ' + url)
-            pdfkit.from_url(url, saveDir + '{}.pdf'.format(idx), configuration=config)
+            print(url)
+            pdfPath = saveDir + '/{}.pdf'.format(idx)
+            print(pdfPath)
+            #wkhUrl2pdfWindows(url, saveDir + '/{}.pdf'.format(idx))
+            try:
+                pdfkit.from_url(url, pdfPath, options=options, configuration=config)
+            except:
+                pass
+
+        tkinter.messagebox.showinfo(title,'下载完成！')
 
     # 第1步，实例化object，建立窗口window
     window = tkinter.Tk()
     
     # 第2步，给窗口的可视化起名字
     version= 'V_0.0.1' #版本规则：框架改动.功能改动.问题修复
-    title = '一番码客 - 批量网页转PDF - ' + version
+    title = '一番码客 - 网址保存为PDF - ' + version
     window.title(title)
     window.resizable(0, 0)# 设置窗口宽高固定，如果放到geometry后面会闪一下
 
     # 第3步，设定窗口的大小(长 * 宽)、图标
-    winWidth = 800
-    winHeight = 560
+    winWidth = 900
+    winHeight = 600
     # 获取屏幕分辨率
     screenWidth = window.winfo_screenwidth()
     screenHeight = window.winfo_screenheight()
@@ -77,48 +197,56 @@ if __name__ == "__main__":  #这里可以判断，当前文件是否是直接被
     tab = ttk.Notebook(window)
 
     frame1 = tkinter.Frame(tab)
-    tab1 = tab.add(frame1, text = "主页面")
+    tab.add(frame1, text = "主页面")
     
     frame2 = tkinter.Frame(tab)
-    tab2 = tab.add(frame2, text = "使用说明")
+    tab.add(frame2, text = "使用说明")
     
     frame3 = tkinter.Frame(tab)
-    tab3 = tab.add(frame3, text = "联系作者")
+    tab.add(frame3, text = "联系作者")
     
     frame4 = tkinter.Frame(tab)
-    tab4 = tab.add(frame4, text = "版本说明")
+    tab.add(frame4, text = "版本说明")
 
     tab.pack(expand = True, fill = tkinter.BOTH)
     
-    # 设置选中tab1
+    # 设置选中frame1
     tab.select(frame1)
     
     # ---------第1页---------
-    fram1_fm0 = Frame(frame1)
-    tkinter.Button(fram1_fm0, text='选择wkhtmltopdf.exe所在位置', bg="#BC8F8F", font=('Arial', 14), command=getNameFile).pack(side=LEFT)
-    # 说明： bg为背景，fg为字体颜色，font为字体，width为长，height为高，这里的长和高是字符的长和高，比如height=2,就是标签有2个字符这么高
-    fram1_fm0.pack(side=TOP, fill=BOTH, expand=YES)
+    #先画出容器
+    frame1_fm00 = tkinter.Frame(frame1)
+    frame1_fm01 = tkinter.Frame(frame1)
+    frame1_fm02 = tkinter.Frame(frame1)
+    frame1_fm03 = tkinter.Frame(frame1)
+    frame1_fm04 = tkinter.Frame(frame1)
 
-    fram1_fm01 = Frame(frame1)
-    L0 = tkinter.Label(fram1_fm01, text='', font=("华文行楷", 13), fg='blue')
-    L0.pack(side=LEFT)
-    # 说明： bg为背景，fg为字体颜色，font为字体，width为长，height为高，这里的长和高是字符的长和高，比如height=2,就是标签有2个字符这么高
-    fram1_fm01.pack(side=TOP, fill=BOTH, expand=YES)
+    frame1_fm00.grid(row=0, column=0,padx=1,pady=3,sticky=W)
+    frame1_fm01.grid(row=1, column=0,padx=1,pady=3,sticky=W)
+    frame1_fm02.grid(row=2, column=0,padx=1,pady=15,sticky=W)
+    frame1_fm03.grid(row=3, column=0,padx=1,pady=0,sticky=W)
+    frame1_fm04.grid(row=4, column=0,padx=1,pady=0,sticky=W)
 
-    fram1_fm1 = Frame(frame1)
-    tkinter.Label(fram1_fm1, text='请输入你想要下载的网址，每个网址换行输入，最多一次输入20个网址：', font=("华文行楷", 13), fg='blue').pack(side=LEFT)
-    # 说明： bg为背景，fg为字体颜色，font为字体，width为长，height为高，这里的长和高是字符的长和高，比如height=2,就是标签有2个字符这么高
-    fram1_fm1.pack(side=TOP, fill=BOTH, expand=YES)
+    #frame1_fm00
+    tkinter.Label(frame1_fm00, text='请输入你想要下载的网址，每个网址换行输入，最多一次输入20个网址：', font=("华文行楷", 13), fg='blue').grid()
 
-    fram1_fm2 = Frame(frame1)
-    t1 = tkinter.Text(fram1_fm2, height=30, width=110)
-    t1.pack(side=LEFT)
-    fram1_fm2.pack(side=TOP, fill=BOTH, expand=YES)
+    #frame1_fm01
+    tWebSites = tkinter.Text(frame1_fm01, height=30, width=125)
+    tWebSites.grid()
 
-    fram1_fm3 = Frame(frame1)
-    b2 = tkinter.Button(fram1_fm3, text='开始下载为PDF', bg="#BC8F8F", font=('宋体', 14), command=startDownload).pack(side=LEFT)
-    fram1_fm3.pack(side=TOP, fill=BOTH, expand=YES)
+    #frame1_fm02
+    tkinter.Button(frame1_fm02, text='开始下载为PDF', bg="#BC8F8F", font=('宋体', 14), command=startDownload).grid(sticky=W)
+    
+    #frame1_fm03
+    tkinter.Button(frame1_fm03, text='修改下载保存路径', bg="#BC8F8F", font=('宋体', 10), command=getSaveDir).grid(row=3, column=0, sticky=W)
+    lSaveDir = tkinter.Label(frame1_fm03, text=saveDir, font=("宋体", 10), fg='blue')
+    lSaveDir.grid(row=3, column=1, sticky=W)
 
+    #frame1_fm04
+    tkinter.Button(frame1_fm04, text='修改wkhtmltopdf.exe所在路径', bg="#BC8F8F", font=('宋体', 10), command=getWkhtmlPath).grid(row=4, column=0, sticky=W)
+    lWkhtmlPath = tkinter.Label(frame1_fm04, text=exeFile, font=("宋体", 10), fg='blue')
+    lWkhtmlPath.grid(row=4, column=1, sticky=W)
+    
     # ---------第2页---------
     funcDes =   '\n'\
                 '功能说明：\n\n'\

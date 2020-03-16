@@ -1,6 +1,7 @@
 import tkinter.filedialog
 import tkinter.messagebox
 from tkinter import *    #注意模块导入方式，否则代码会有差别
+import tkinter.scrolledtext as ScrolledText
 import threading
 from configobj import ConfigObj
 import os
@@ -28,9 +29,11 @@ class MarkUrlDownloadGui(object):
         tkinter.Label(subFm00, text='请输入您想要下载的网址，每个网址换行输入，一次最多可输入30个网址：', font=("华文行楷", 13), fg='blue').grid()
 
         #subFm01
-        self.tWebSites = tkinter.Text(subFm01, height=30, width=125)
-        # self.tWebSites['background'] = '#FFCCCC'
-        self.tWebSites.grid()
+        self.tWebSites = ScrolledText.ScrolledText(subFm01, height=40, width=167,wrap="none")
+        hbar = tkinter.Scrollbar(subFm01, orient=HORIZONTAL, command=self.tWebSites.xview)
+        self.tWebSites.configure(xscrollcommand=hbar.set)
+        self.tWebSites.grid(padx=5)
+        hbar.grid(sticky=EW)
 
         #subFm02
         tkinter.Button(subFm02, text='开始下载为PDF', bg="#BC8F8F", font=('宋体', 14), command=lambda : self.thread_it(self.startDownload)).grid(row=2, column=0, stick=W)

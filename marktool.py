@@ -11,7 +11,7 @@ from about import About
 
 class Application(object):
     def __init__(self):
-        self.title = 'MarkTool - 互联网信息处理专家'
+        self.title = 'MarkTool - 互联网信息整理工具'
         self.version= 'V_1.1.1' #版本规则：框架改动.功能改动.问题修复
         print("Application init")
 
@@ -24,8 +24,8 @@ class Application(object):
         window.resizable(0, 0)# 设置窗口宽高固定，如果放到geometry后面会闪一下
 
         # 第3步，设定窗口的大小(长 * 宽)、图标
-        winWidth = 900
-        winHeight = 600
+        winWidth = 1200
+        winHeight = 750
         # 获取屏幕分辨率
         screenWidth = window.winfo_screenwidth()
         screenHeight = window.winfo_screenheight()

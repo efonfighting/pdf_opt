@@ -18,7 +18,7 @@ class About(object):
         # ---------第 1 栏---------
         subFram1 = Frame(frame)
 
-        title1 = "联系作者："
+        title1 = "联系我们："
         Label(subFram1, text=title1, font=("楷书", 15, "bold"), justify = 'left').grid(sticky=W)
         with open('tmp.jpg','wb') as tmp:
             tmp.write(base64.b64decode(Efon().img))

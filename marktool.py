@@ -11,7 +11,7 @@ from about import About
 
 class Application(object):
     def __init__(self):
-        self.title = 'MarkTool - 互联网信息整理工具'
+        self.title = 'MarkTool - 互联网信息工作站'
         self.version= 'V_1.1.1' #版本规则：框架改动.功能改动.问题修复
         print("Application init")
 

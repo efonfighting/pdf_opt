@@ -1,24 +1,36 @@
 import base64
 # ico
-with open("icon.py","w") as f:
+with open("asset.py","w") as f:
     f.write('class Icon(object):\n')
     f.write('\tdef __init__(self):\n')
     f.write("\t\tself.img='")
-with open("icon0.ico","rb") as i:
+with open("icon2.ico","rb") as i:
     b64str = base64.b64encode(i.read())
-    with open("icon.py","ab+") as f:
+    with open("asset.py","ab+") as f:
         f.write(b64str)
-with open("icon.py","a") as f:
-    f.write("'")
+with open("asset.py","a") as f:
+    f.write("'\n")
 
-# efon.jpg
-with open("efon.py","w") as f:
-    f.write('class Efon(object):\n')
+# lianxi.jpg
+with open("asset.py","a") as f:
+    f.write('class Lianxi(object):\n')
     f.write('\tdef __init__(self):\n')
     f.write("\t\tself.img='")
-with open("efon.jpg","rb") as i:
+with open("lianxi.jpg","rb") as i:
     b64str = base64.b64encode(i.read())
-    with open("efon.py","ab+") as f:
+    with open("asset.py","ab+") as f:
         f.write(b64str)
-with open("efon.py","a") as f:
-    f.write("'")
+with open("asset.py","a") as f:
+    f.write("'\n")
+
+# shequ.png
+with open("asset.py","a") as f:
+    f.write('class Shequ(object):\n')
+    f.write('\tdef __init__(self):\n')
+    f.write("\t\tself.img='")
+with open("shequ.png","rb") as i:
+    b64str = base64.b64encode(i.read())
+    with open("asset.py","ab+") as f:
+        f.write(b64str)
+with open("asset.py","a") as f:
+    f.write("'\n")

@@ -5,7 +5,7 @@ import tkinter.filedialog
 import tkinter.messagebox
 from tkinter import *    #注意模块导入方式，否则代码会有差别
 from tkinter import ttk
-from asset.icon import Icon
+from asset import asset
 from markUrlDownload.markUrlDownloadGui import MarkUrlDownloadGui
 from about import About
 
@@ -35,7 +35,7 @@ class Application(object):
         window.geometry("%sx%s+%s+%s" % (winWidth, winHeight, x, y))
         # 设置窗口图标
         with open('tmp.ico','wb') as tmp:
-            tmp.write(base64.b64decode(Icon().img))
+            tmp.write(base64.b64decode(asset.Icon().img))
         window.iconbitmap('tmp.ico')
         os.remove('tmp.ico')
 

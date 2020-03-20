@@ -1,6 +1,6 @@
 import os, base64
 from tkinter import *    #注意模块导入方式，否则代码会有差别
-from asset.efon import Efon
+from asset import asset
 from PIL import Image, ImageTk
 
 class About(object):
@@ -21,7 +21,7 @@ class About(object):
         title1 = "联系我们："
         Label(subFram1, text=title1, font=("楷书", 15, "bold"), justify = 'left').grid(sticky=W)
         with open('tmp.jpg','wb') as tmp:
-            tmp.write(base64.b64decode(Efon().img))
+            tmp.write(base64.b64decode(asset.Lianxi().img))
         im = Image.open('tmp.jpg')
         # you need to keep a reference to the photo object, otherwise, it will be out of the scope and be garbage collected.
         subFram1.tk_im = ImageTk.PhotoImage(im)
@@ -30,6 +30,20 @@ class About(object):
         os.remove('tmp.jpg')
 
         # ---------第 2 栏---------
+        subFram1 = Frame(frame)
+
+        title1 = "交流社区："
+        Label(subFram1, text=title1, font=("楷书", 15, "bold"), justify = 'left').grid(sticky=W)
+        with open('tmp.jpg','wb') as tmp:
+            tmp.write(base64.b64decode(asset.Shequ().img))
+        im = Image.open('tmp.jpg')
+        # you need to keep a reference to the photo object, otherwise, it will be out of the scope and be garbage collected.
+        subFram1.tk_im = ImageTk.PhotoImage(im)
+        Label(subFram1, image=subFram1.tk_im).grid(pady=10)
+        subFram1.grid(sticky=W, pady=10)
+        os.remove('tmp.jpg')
+
+        # ---------第 3 栏---------
         subFram2 = Frame(frame)
 
         title2 = "版本说明："
@@ -47,7 +61,7 @@ class About(object):
 
         subFram2.grid(sticky=W, pady=10)
 
-        # ---------第 3 栏---------
+        # ---------第 4 栏---------
 
 
         tkFrame.update()

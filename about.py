@@ -26,7 +26,7 @@ class About(object):
         # you need to keep a reference to the photo object, otherwise, it will be out of the scope and be garbage collected.
         subFram1.tk_im = ImageTk.PhotoImage(im)
         Label(subFram1, image=subFram1.tk_im).grid(pady=10)
-        subFram1.grid(pady=10)
+        subFram1.grid(sticky=W, pady=10)
         os.remove('tmp.jpg')
 
         # ---------第 2 栏---------
@@ -46,7 +46,7 @@ class About(object):
         # ---------第 3 栏---------
         subFram2 = Frame(frame)
 
-        title2 = "版本说明："
+        title2 = "版本记录："
         Label(subFram2, text=title2, font=("楷书", 15, "bold"), justify = 'left').grid(sticky=W,pady=10)
 
         verDes =   '================================================================================\n'\

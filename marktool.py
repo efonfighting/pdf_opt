@@ -42,16 +42,19 @@ class Application(object):
         # 设置分页
         tab = ttk.Notebook(window)
 
-        frame1 = tkinter.Frame(tab)
-        tab.add(frame1, text = "网页下载")
+        urlDownloadFram = tkinter.Frame(tab)
+        tab.add(urlDownloadFram, text = "网页下载")
 
-        frame2 = tkinter.Frame(tab)
-        tab.add(frame2, text = "关于")
+        pdfMergeFram = tkinter.Frame(tab)
+        tab.add(pdfMergeFram, text = "PDF合并")
+        
+        aboutFram = tkinter.Frame(tab)
+        tab.add(aboutFram, text = "关于")
         
         tab.pack(expand = True, fill = tkinter.BOTH)
         
-        # 设置选中frame1
-        tab.select(frame1)
+        # 设置选中urlDownloadFram
+        tab.select(urlDownloadFram)
         
         # ---------底部声明---------
         bottomFram2 = Frame(window)
@@ -84,8 +87,8 @@ class Application(object):
                 window.destroy()
         window.protocol("WM_DELETE_WINDOW", on_closing)
 
-        MarkUrlDownloadGui(frame1)
-        About(frame2)
+        MarkUrlDownloadGui(urlDownloadFram)
+        About(aboutFram)
 
         # ---------主窗口循环显示---------
         window.mainloop()

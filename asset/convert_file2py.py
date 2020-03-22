@@ -11,12 +11,12 @@ with open("icon2.ico","rb") as i:
 with open("asset.py","a") as f:
     f.write("'\n")
 
-# lianxi.jpg
+# lianxi.png
 with open("asset.py","a") as f:
     f.write('class Lianxi(object):\n')
     f.write('\tdef __init__(self):\n')
     f.write("\t\tself.img='")
-with open("lianxi.jpg","rb") as i:
+with open("lianxi.png","rb") as i:
     b64str = base64.b64encode(i.read())
     with open("asset.py","ab+") as f:
         f.write(b64str)

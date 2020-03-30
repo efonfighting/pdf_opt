@@ -3,7 +3,7 @@ import os
 
 class MarkWebDownload(object):
     def __init__(self):
-        print("MarkWebDownload init")
+        print("urlDownload init")
 
     def url2pdf(self, url, exeFile, pdfPath, ops):
         '''
@@ -27,7 +27,6 @@ class MarkWebDownload(object):
             print("download finished : " + url + " ---> " + pdfPath)
         except:
             print("download error : " + url)
-            return False
             pass
 
         return True

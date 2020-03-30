@@ -6,13 +6,14 @@ import threading
 from configobj import ConfigObj
 import os
 from markUrlDownload.markWebDownload import MarkWebDownload
+from markUrlDownload.markVideoDownload import MarkVideoDownload
 
 import datetime
 
 class MarkUrlDownloadGui(object):
     def __init__(self, tkFrame):
         self.downloading = False
-        self.downloadType = 'url'
+        self.downloadType = 'web'
         self.paramInit()
         #先画出容器
         subFm00 = tkinter.Frame(tkFrame)
@@ -60,14 +61,14 @@ class MarkUrlDownloadGui(object):
 
         v = tkinter.IntVar()
         v.set(1) # set函数是设置单选框中的初始值，set的参数和Radiobutton组件中的value比较，如果存在相同的情况，则为初始值
-        tkinter.Radiobutton(subFm05, variable=v ,value=1, command=lambda : self.radioBtCmd('url'), background='white', text="普通非注册网页下载").grid(sticky=W, padx=3,pady=6)
+        tkinter.Radiobutton(subFm05, variable=v ,value=1, command=lambda : self.radioBtCmd('web'), background='white', text="普通非注册网页下载").grid(sticky=W, padx=3,pady=6)
         tkinter.Radiobutton(subFm05, variable=v ,value=2, command=lambda : self.radioBtCmd('zhihu'), background='white', text="知乎问题图片/视频下载").grid(sticky=W, padx=3,pady=6)
         tkinter.Radiobutton(subFm05, variable=v ,value=3, command=lambda : self.radioBtCmd('video'), background='white', text="全网视频下载").grid(sticky=W, padx=3,pady=6)
 
     def paramInit(self):
         self.curDir =  os.getcwd().replace("\\",'/')
         self.wkhtmltopdfExe = os.path.join(self.curDir,'config/sub01.exe')
-        self.annieExe = 'config/sub02.exe'
+        self.annieExe = os.path.join(self.curDir,'config/sub02.exe')
         self.saveDir = self.curDir
 
         if(os.path.exists("config/config.ini")):
@@ -84,7 +85,7 @@ class MarkUrlDownloadGui(object):
             tkinter.messagebox.showinfo("MarkTool", "正在下载中...")
             return
 
-        if(os.path.exists(self.wkhtmltopdfExe)):
+        if(os.path.exists(self.wkhtmltopdfExe) and os.path.exists(self.annieExe)):
             pass
         else:
             tkinter.messagebox.showinfo('配置丢失','配置文件丢失，请勿删除config文件夹!')
@@ -94,17 +95,21 @@ class MarkUrlDownloadGui(object):
         urls = [i for i in urls if i != ''] # 删除所有空元素
         self.downloading = True
 
-        if (self.downloadType == 'url'):
-            self.urlDwnldFunc(urls)
-        elif (self.downloadType == 'zhihu'):
-            self.zhihuDwnldFunc(urls)
-        elif (self.downloadType == 'video'):
-            self.videoDwnldFunc(urls)
+        try:
+            if (self.downloadType == 'web'):
+                self.webDwnldFunc(urls)
+            elif (self.downloadType == 'zhihu'):
+                self.zhihuDwnldFunc(urls)
+            elif (self.downloadType == 'video'):
+                self.videoDwnldFunc(urls)
+        except Exception as e:
+            print(e)
+            print('download error:' + self.downloadType)
 
         self.lDldProcess.config(text="下载完成！", font=("宋体", 12))
         self.downloading = False
 
-    def urlDwnldFunc(self, urls):
+    def webDwnldFunc(self, urls):
         dld = MarkWebDownload()
         options = {
             'page-size': 'A4',
@@ -121,7 +126,7 @@ class MarkUrlDownloadGui(object):
         }
 
         webSaveDir = os.path.join(self.saveDir , 'webSite')
-        if(os.path.exists(os.path.join(webSaveDir) == False)):
+        if(os.path.exists(webSaveDir) == False):
             os.makedirs(webSaveDir)
 
         for idx,url in enumerate(urls):
@@ -134,18 +139,29 @@ class MarkUrlDownloadGui(object):
         print(urls)
 
     def videoDwnldFunc(self, urls):
-        print(urls)
+        dld = MarkVideoDownload()
+        videoSaveDir = os.path.join(self.saveDir , 'video')
+        if(os.path.exists(videoSaveDir) == False):
+            os.makedirs(videoSaveDir)
+
+        for idx,url in enumerate(urls):
+            process = "正在下载：{}/{}".format(idx+1,len(urls))
+            self.lDldProcess.config(text=process, font=("宋体", 12))
+            dld.url2video(url, self.annieExe, videoSaveDir)
 
     def thread_it(self, func, *args):
         '''将函数打包进线程'''
         # 创建
-        t = threading.Thread(target=func, args=args)
-        # 守护 !!!
-        t.setDaemon(True)
-        # 启动
-        t.start()
-        # 阻塞--卡死界面！
-        # t.join()
+        try:
+            t = threading.Thread(target=func, args=args)
+            # 守护 !!!
+            t.setDaemon(True)
+            # 启动
+            t.start()
+            # 阻塞--卡死界面！
+            # t.join()
+        except:
+            self.downloading = False
 
     def openDir(self, path):
         try:

@@ -7,6 +7,7 @@ from configobj import ConfigObj
 import os
 from markUrlDownload.markWebDownload import MarkWebDownload
 from markUrlDownload.markVideoDownload import MarkVideoDownload
+import external.ToolTip as tt
 
 import datetime
 
@@ -21,7 +22,7 @@ class MarkUrlDownloadGui(object):
         subFm02 = tkinter.Frame(tkFrame)
         subFm03 = tkinter.Frame(tkFrame)
         # subFm04 = tkinter.Frame(tkFrame)
-        subFm05 = tkinter.Frame(tkFrame, background='white')
+        subFm05 = ttk.LabelFrame(tkFrame, text='配置栏', labelanchor="n")
 
         subFm00.grid(row=0, column=1,padx=1,pady=3,sticky=W)
         subFm01.grid(row=1, column=1,padx=1,pady=3,sticky=W)
@@ -42,8 +43,11 @@ class MarkUrlDownloadGui(object):
 
         #subFm02
         tkinter.Button(subFm02, text='开始下载', bg="#BC8F8F", font=('宋体', 14), command=lambda : self.thread_it(self.startDownload)).grid(row=2, column=0, stick=W)
-        self.lDldProcess = tkinter.Label(subFm02, text='', font=("宋体", 10))
+        self.lDldProcess = ttk.Progressbar(subFm02, orient='horizontal', length=286, mode='determinate')
         self.lDldProcess.grid(row=2, column=1, padx=8, sticky=W)
+        self.lDldProcessText = tkinter.Label(subFm02, text='', font=("宋体", 10))
+        self.lDldProcessText.grid(row=2, column=2, padx=8, sticky=W)
+
 
         #subFm03
         self.lSaveDir = tkinter.Label(subFm03, text="保存路径："+self.saveDir, font=("宋体", 10, "bold"))
@@ -51,19 +55,11 @@ class MarkUrlDownloadGui(object):
         tkinter.Button(subFm03, text='打开', font=('宋体', 10), command=lambda : self.thread_it(self.openDir, self.saveDir)).grid(row=3, column=1, padx=10)
         tkinter.Button(subFm03, text='修改', font=('宋体', 10), command=self.setSaveDir).grid(row=3, column=2, sticky=W)
 
-        #subFm04
-        # self.lWkhtmlPath = tkinter.Label(subFm04, text="wkhtmltopdf.exe路径：" + self.wkhtmltopdfExe, font=("宋体", 10, "bold"))
-        # self.lWkhtmlPath.grid(row=4, column=0, sticky=W)
-        # tkinter.Button(subFm04, text='修改', font=('宋体', 10), command=self.getWkhtmlPath).grid(row=4, column=1, padx=10, stick=E)
-
-        #subFm05
-        tkinter.Label(subFm05, text='配置栏', font=("楷体", 13, "bold"), background='white').grid(pady=6)
-
-        v = tkinter.IntVar()
-        v.set(1) # set函数是设置单选框中的初始值，set的参数和Radiobutton组件中的value比较，如果存在相同的情况，则为初始值
-        tkinter.Radiobutton(subFm05, variable=v ,value=1, command=lambda : self.radioBtCmd('web'), background='white', text="普通非注册网页下载").grid(sticky=W, padx=3,pady=6)
-        tkinter.Radiobutton(subFm05, variable=v ,value=2, command=lambda : self.radioBtCmd('zhihu'), background='white', text="知乎问题图片/视频下载").grid(sticky=W, padx=3,pady=6)
-        tkinter.Radiobutton(subFm05, variable=v ,value=3, command=lambda : self.radioBtCmd('video'), background='white', text="全网视频下载").grid(sticky=W, padx=3,pady=6)
+        subFm05.v = tkinter.IntVar()
+        subFm05.v.set(1) # set函数是设置单选框中的初始值，set的参数和Radiobutton组件中的value比较，如果存在相同的情况，则为初始值
+        tkinter.Radiobutton(subFm05, variable=subFm05.v ,value=1, command=lambda : self.radioBtCmd('web'), text="普通非注册网页下载", font=("宋体", 10, "bold")).grid(sticky=W, padx=3,pady=6)
+        tkinter.Radiobutton(subFm05, variable=subFm05.v ,value=2, command=lambda : self.radioBtCmd('zhihu'), text="知乎问题图片/视频下载", font=("宋体", 10, "bold")).grid(sticky=W, padx=3,pady=6)
+        tkinter.Radiobutton(subFm05, variable=subFm05.v ,value=3, command=lambda : self.radioBtCmd('video'), text="全网视频下载", font=("宋体", 10, "bold")).grid(sticky=W, padx=3,pady=6)
 
     def paramInit(self):
         self.curDir =  os.getcwd().replace("\\",'/')
@@ -106,8 +102,16 @@ class MarkUrlDownloadGui(object):
             print(e)
             print('download error:' + self.downloadType)
 
-        self.lDldProcess.config(text="下载完成！", font=("宋体", 12))
+        self.lDldProcessText.config(text="下载完成！", font=("宋体", 12))
         self.downloading = False
+
+    def run_progressbar(self, cur, max):
+        self.lDldProcess["maximum"] = max
+        self.lDldProcess["value"] = cur   # increment progressbar
+        self.lDldProcess.update()       # have to call update() in loop
+
+        process = "已下载：{}/{}".format(cur,max)
+        self.lDldProcessText.config(text=process, font=("宋体", 12))
 
     def webDwnldFunc(self, urls):
         dld = MarkWebDownload()
@@ -130,10 +134,10 @@ class MarkUrlDownloadGui(object):
             os.makedirs(webSaveDir)
 
         for idx,url in enumerate(urls):
-            process = "正在下载：{}/{}".format(idx+1,len(urls))
-            self.lDldProcess.config(text=process, font=("宋体", 12))
+            self.run_progressbar(idx, len(urls))
             pdfPath = os.path.join(webSaveDir ,datetime.datetime.now().strftime('%Y%m%d_%H%M%S_%f') + '.pdf')
             dld.url2pdf(url, self.wkhtmltopdfExe, pdfPath, options)
+        self.run_progressbar(len(urls), len(urls))
 
     def zhihuDwnldFunc(self, urls):
         print(urls)
@@ -145,7 +149,7 @@ class MarkUrlDownloadGui(object):
             os.makedirs(videoSaveDir)
 
         for idx,url in enumerate(urls):
-            process = "正在下载：{}/{}".format(idx+1,len(urls))
+            process = "已下载：{}/{}".format(idx+1,len(urls))
             self.lDldProcess.config(text=process, font=("宋体", 12))
             dld.url2video(url, self.annieExe, videoSaveDir)
 

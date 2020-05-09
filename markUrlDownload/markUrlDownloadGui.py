@@ -135,8 +135,7 @@ class MarkUrlDownloadGui(object):
 
         for idx,url in enumerate(urls):
             self.run_progressbar(idx, len(urls))
-            pdfPath = os.path.join(webSaveDir ,datetime.datetime.now().strftime('%Y%m%d_%H%M%S_%f') + '.pdf')
-            dld.url2pdf(url, self.wkhtmltopdfExe, pdfPath, options)
+            dld.url2pdf(url, self.wkhtmltopdfExe, webSaveDir, options)
         self.run_progressbar(len(urls), len(urls))
 
     def zhihuDwnldFunc(self, urls):

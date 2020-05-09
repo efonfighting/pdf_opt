@@ -3,3 +3,5 @@ pythotk
 requests
 configobj
 Pillow
+bs4
+lxml

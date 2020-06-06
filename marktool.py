@@ -45,6 +45,12 @@ class Application(object):
         urlDownloadFram = tkinter.Frame(tab)
         tab.add(urlDownloadFram, text = "网页下载")
 
+        zhihuDownloadFram = tkinter.Frame(tab)
+        tab.add(zhihuDownloadFram, text = "知乎下载")
+
+        videoDownloadFram = tkinter.Frame(tab)
+        tab.add(videoDownloadFram, text = "视频下载")
+
         pdfMergeFram = tkinter.Frame(tab)
         tab.add(pdfMergeFram, text = "PDF合并")
         

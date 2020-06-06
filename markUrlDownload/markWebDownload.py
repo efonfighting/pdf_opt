@@ -4,6 +4,7 @@ import urllib.request
 from lxml import html
 import datetime,random,requests
 from bs4 import BeautifulSoup
+from imgOpt import imgOpt
 
 class MarkWebDownload(object):
     def __init__(self):
@@ -85,9 +86,9 @@ class MarkWebDownload(object):
         for i in img_src:
             picCnt = picCnt + 1
             try:
-                print(str(i))
+                print(picCnt, " : ", str(i))
                 imgUrl = re.findall(r'src=\"(.*?)\"', str(i))[0]
-                print(picCnt, " : ", imgUrl)
+                print(imgUrl)
             except Exception as e:
                 print("imgUrl is invalible." + str(i))
                 print(e)
@@ -162,6 +163,7 @@ class MarkWebDownload(object):
             if (contLen != 0):
                 open(picName, 'wb').write(urlCont)
                 print("get url ok:", contLen)
+                imgOpt.imgConvert(picName, picName)
             else:
                 print("get url failed.")
         except Exception as e:

@@ -21,15 +21,13 @@ class MarkUrlDownloadGui(object):
         subFm01 = tkinter.Frame(tkFrame)
         subFm02 = tkinter.Frame(tkFrame)
         subFm03 = tkinter.Frame(tkFrame)
-        # subFm04 = tkinter.Frame(tkFrame)
-        subFm05 = ttk.LabelFrame(tkFrame, text='配置栏', labelanchor="n")
+        subFm05 = ttk.LabelFrame(tkFrame, text='说明')
 
-        subFm00.grid(row=0, column=1,padx=1,pady=3,sticky=W)
-        subFm01.grid(row=1, column=1,padx=1,pady=3,sticky=W)
-        subFm02.grid(row=2, column=1,padx=1,pady=15,sticky=W)
-        subFm03.grid(row=3, column=1,padx=1,pady=0,sticky=W)
-        # subFm04.grid(row=4, column=1,padx=1,pady=0,sticky=W)
-        subFm05.grid(row=0, column=0,padx=10,pady=5,rowspan=5,columnspan=1,sticky=W+E+N+S)
+        subFm00.grid(row=0, column=0,padx=1,pady=3,sticky=W)
+        subFm01.grid(row=1, column=0,padx=1,pady=3,sticky=W)
+        subFm02.grid(row=2, column=0,padx=1,pady=15,sticky=W)
+        subFm03.grid(row=3, column=0,padx=1,pady=0,sticky=W)
+        subFm05.grid(row=0, column=1,pady=5,rowspan=2,columnspan=1,sticky=W+E+N+S)
 
         #subFm00
         tkinter.Label(subFm00, text='请输入您想要下载的网址，每个网址换行输入，一次最多可输入30个网址：', font=("楷体", 13, "bold")).grid()
@@ -55,11 +53,17 @@ class MarkUrlDownloadGui(object):
         tkinter.Button(subFm03, text='打开', font=('宋体', 10), command=lambda : self.thread_it(self.openDir, self.saveDir)).grid(row=3, column=1, padx=10)
         tkinter.Button(subFm03, text='修改', font=('宋体', 10), command=self.setSaveDir).grid(row=3, column=2, sticky=W)
 
-        subFm05.v = tkinter.IntVar()
-        subFm05.v.set(1) # set函数是设置单选框中的初始值，set的参数和Radiobutton组件中的value比较，如果存在相同的情况，则为初始值
-        tkinter.Radiobutton(subFm05, variable=subFm05.v ,value=1, command=lambda : self.radioBtCmd('web'), text="普通非注册网页下载", font=("宋体", 10, "bold")).grid(sticky=W, padx=3,pady=6)
-        tkinter.Radiobutton(subFm05, variable=subFm05.v ,value=2, command=lambda : self.radioBtCmd('zhihu'), text="知乎问题图片/视频下载", font=("宋体", 10, "bold")).grid(sticky=W, padx=3,pady=6)
-        tkinter.Radiobutton(subFm05, variable=subFm05.v ,value=3, command=lambda : self.radioBtCmd('video'), text="全网视频下载", font=("宋体", 10, "bold")).grid(sticky=W, padx=3,pady=6)
+        #subFm05
+        instructText = \
+        "只针对可以公开访问的网站，\
+        \n无法下载需要登陆的网站，\
+        \n未适配网站可能存在格式异常。\
+        \n\n保存名：下载时间_网页名。\
+        \
+        \n\n已适配网站:\
+        \n- 微信公众号\
+        \n"
+        ttk.Label(subFm05, text = instructText).grid(sticky=W, padx=12,pady=6)
 
     def paramInit(self):
         self.curDir =  os.getcwd().replace("\\",'/')
@@ -116,17 +120,12 @@ class MarkUrlDownloadGui(object):
     def webDwnldFunc(self, urls):
         dld = MarkWebDownload()
         options = {
-            'page-size': 'A4',
             'margin-top': '0mm',
-            'margin-right': '0mm',
             'margin-bottom': '0mm',
-            'margin-left': '0mm',
-            # 'orientation':'Landscape',#横向
             'encoding': "UTF-8",
-            'no-outline': None,
             'enable-plugins': None,
+            'enable-forms': None,
             'stop-slow-scripts': None,
-            'footer-right':'[page]' ,
         }
 
         webSaveDir = os.path.join(self.saveDir , 'webSite')

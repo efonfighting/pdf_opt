@@ -33,7 +33,7 @@ class MarkUrlDownloadGui(object):
         tkinter.Label(subFm00, text='请输入您想要下载的网址，每个网址换行输入，一次最多可输入30个网址：', font=("楷体", 13, "bold")).grid()
 
         #subFm01
-        self.tWebSites = ScrolledText.ScrolledText(subFm01, height=42, width=140,wrap="none")
+        self.tWebSites = ScrolledText.ScrolledText(subFm01, height=42, width=130,wrap="none")
         hbar = tkinter.Scrollbar(subFm01, orient=HORIZONTAL, command=self.tWebSites.xview)
         self.tWebSites.configure(xscrollcommand=hbar.set)
         self.tWebSites.grid(padx=5)
@@ -41,11 +41,17 @@ class MarkUrlDownloadGui(object):
 
         #subFm02
         tkinter.Button(subFm02, text='开始下载', bg="#BC8F8F", font=('宋体', 14), command=lambda : self.thread_it(self.startDownload)).grid(row=2, column=0, stick=W)
-        self.lDldProcess = ttk.Progressbar(subFm02, orient='horizontal', length=286, mode='determinate')
-        self.lDldProcess.grid(row=2, column=1, padx=8, sticky=W)
-        self.lDldProcessText = tkinter.Label(subFm02, text='', font=("宋体", 10))
-        self.lDldProcessText.grid(row=2, column=2, padx=8, sticky=W)
 
+        self.savePdfEn = IntVar()
+        self.pdfCheckButton = Checkbutton(subFm02, text = "同时保存为PDF", variable = self.savePdfEn, onvalue = 1, offvalue = 0)
+        self.pdfCheckButton.grid(row=2, column=1, padx=8, sticky=W)
+        tt.create_ToolTip(self.pdfCheckButton, "保存为PDF会略微增加整体下载时间。")
+
+        self.lDldProcess = ttk.Progressbar(subFm02, orient='horizontal', length=600, mode='determinate')
+        self.lDldProcess.grid(row=2, column=2, padx=8, sticky=W)
+
+        self.lDldProcessText = tkinter.Label(subFm02, text='', font=("宋体", 10))
+        self.lDldProcessText.grid(row=2, column=3, padx=8, sticky=W)
 
         #subFm03
         self.lSaveDir = tkinter.Label(subFm03, text="保存路径："+self.saveDir, font=("宋体", 10, "bold"))
@@ -53,15 +59,20 @@ class MarkUrlDownloadGui(object):
         tkinter.Button(subFm03, text='打开', font=('宋体', 10), command=lambda : self.thread_it(self.openDir, self.saveDir)).grid(row=3, column=1, padx=10)
         tkinter.Button(subFm03, text='修改', font=('宋体', 10), command=self.setSaveDir).grid(row=3, column=2, sticky=W)
 
+        #subFm04
+
+
         #subFm05
         instructText = \
-        "只针对可以公开访问的网站，\
-        \n无法下载需要登陆的网站，\
-        \n未适配网站可能存在格式异常。\
-        \n\n保存名：下载时间_网页名。\
-        \
-        \n\n已适配网站:\
-        \n- 微信公众号\
+        "▶ 已适配网站:\
+        \n      ◉ 微信公众号\
+        \n\
+        \n▶ 注意：\
+        \n      ◉ 只针对可以公开访问的网站\
+        \n      ◉ 无法下载需要登陆的网站\
+        \n      ◉ 未适配网站可能存在格式异常\
+        \n\
+        \n▶ 保存名：下载时间_网页名\
         \n"
         ttk.Label(subFm05, text = instructText).grid(sticky=W, padx=12,pady=6)
 
@@ -81,8 +92,11 @@ class MarkUrlDownloadGui(object):
                 print('get para succeed')
 
     def startDownload(self):
+        isSavePdf = self.savePdfEn.get()
+        print("savePdfEn: " + str(isSavePdf))
+
         if(self.downloading == True):
-            tkinter.messagebox.showinfo("MarkTool", "正在下载中...")
+            tkinter.messagebox.showinfo("MarkTool", "上次下载仍在进行中，请稍等...")
             return
 
         if(os.path.exists(self.wkhtmltopdfExe) and os.path.exists(self.annieExe)):
@@ -96,12 +110,7 @@ class MarkUrlDownloadGui(object):
         self.downloading = True
 
         try:
-            if (self.downloadType == 'web'):
-                self.webDwnldFunc(urls)
-            elif (self.downloadType == 'zhihu'):
-                self.zhihuDwnldFunc(urls)
-            elif (self.downloadType == 'video'):
-                self.videoDwnldFunc(urls)
+            self.webDwnldFunc(urls, isSavePdf)
         except Exception as e:
             print(e)
             print('download error:' + self.downloadType)
@@ -117,7 +126,7 @@ class MarkUrlDownloadGui(object):
         process = "已下载：{}/{}".format(cur,max)
         self.lDldProcessText.config(text=process, font=("宋体", 12))
 
-    def webDwnldFunc(self, urls):
+    def webDwnldFunc(self, urls, savePdfEn):
         dld = MarkWebDownload()
         options = {
             'margin-top': '0mm',
@@ -134,7 +143,7 @@ class MarkUrlDownloadGui(object):
 
         for idx,url in enumerate(urls):
             self.run_progressbar(idx, len(urls))
-            dld.url2pdf(url, self.wkhtmltopdfExe, webSaveDir, options)
+            dld.url2pdf(url, self.wkhtmltopdfExe, webSaveDir, options, savePdfEn)
         self.run_progressbar(len(urls), len(urls))
 
     def zhihuDwnldFunc(self, urls):

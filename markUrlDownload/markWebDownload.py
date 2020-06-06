@@ -10,7 +10,7 @@ class MarkWebDownload(object):
     def __init__(self):
         print("MarkWebDownload init")
 
-    def url2pdf(self, url, exeFile, pdfPath, ops):
+    def url2pdf(self, url, exeFile, pdfPath, ops, savePdfEn):
         '''
         通过wkhtmltopdf下载url/html为pdf
         :param url : 要保存的url
@@ -31,7 +31,9 @@ class MarkWebDownload(object):
         try:
             htmlPath = self.url2html(url, pdfPath).replace("\\", "/")
             htmlName = os.path.split(htmlPath)[-1].replace(".html","")
-            pdfkit.from_file(htmlPath, pdfPath+f'/{htmlName}.pdf', options=ops, configuration=config)
+            if savePdfEn:
+                print("HTML转换PDF中...")
+                pdfkit.from_file(htmlPath, pdfPath+f'/{htmlName}.pdf', options=ops, configuration=config)
             print("download finished : " + url + " ---> " + pdfPath)
         except Exception as e:
             print("download error : " + url)
@@ -86,9 +88,9 @@ class MarkWebDownload(object):
         for i in img_src:
             picCnt = picCnt + 1
             try:
-                print(picCnt, " : ", str(i))
+                #print(picCnt, " : ", str(i))
                 imgUrl = re.findall(r'src=\"(.*?)\"', str(i))[0]
-                print(imgUrl)
+                print(picCnt, " : ", imgUrl)
             except Exception as e:
                 print("imgUrl is invalible." + str(i))
                 print(e)

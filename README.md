@@ -19,5 +19,5 @@
 * 编译主程序之前，需要先执行convert_file2py.py，将依赖文件转换成py文件类。
 
 ## 打包exe
-* `pyinstaller -F marktool.py -w -i asset/icon0.ico --version-file=asset/file_version_info.txt`
+* `pyinstaller -F marktool.py -w -i asset/icon2.ico --version-file=asset/file_version_info.txt`
 * info：C:/Users/xxx/AppData/Local/Programs/Python/Python37/Lib/site-packages/PyInstaller/utils/cliutils

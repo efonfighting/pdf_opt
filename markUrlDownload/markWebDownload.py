@@ -5,12 +5,13 @@ from lxml import html
 import datetime,random,requests
 from bs4 import BeautifulSoup
 from imgOpt import imgOpt
+import subprocess
 
 class MarkWebDownload(object):
     def __init__(self):
         print("MarkWebDownload init")
 
-    def url2pdf(self, url, exeFile, pdfPath, ops, savePdfEn):
+    def url2pdf(self, url, exeFile, pdfPath, savePdfEn):
         '''
         通过wkhtmltopdf下载url/html为pdf
         :param url : 要保存的url
@@ -27,13 +28,13 @@ class MarkWebDownload(object):
             print('请选择正确的wkhtmltopdf.exe路径')
             return False
 
-        config = pdfkit.configuration(wkhtmltopdf=exeFile)
         try:
             htmlPath = self.url2html(url, pdfPath).replace("\\", "/")
             htmlName = os.path.split(htmlPath)[-1].replace(".html","")
             if savePdfEn:
                 print("HTML转换PDF中...")
-                pdfkit.from_file(htmlPath, pdfPath+f'/{htmlName}.pdf', options=ops, configuration=config)
+                subprocess.call([exeFile, "--enable-plugins", "--enable-forms","--margin-bottom","0","--margin-top", "0", \
+                    "--disable-external-links", "--disable-javascript",htmlPath, pdfPath+f'/{htmlName}.pdf'], shell=True)
             print("download finished : " + url + " ---> " + pdfPath)
         except Exception as e:
             print("download error : " + url)

@@ -7,6 +7,7 @@ from tkinter import *    #注意模块导入方式，否则代码会有差别
 from tkinter import ttk
 from asset import asset
 from markUrlDownload.markUrlDownloadGui import MarkUrlDownloadGui
+from pdfMerge.pdfMergeGui import PdfMergeGui
 from about import About
 
 class Application(object):
@@ -45,14 +46,14 @@ class Application(object):
         urlDownloadFram = tkinter.Frame(tab)
         tab.add(urlDownloadFram, text = "网页下载")
 
-        zhihuDownloadFram = tkinter.Frame(tab)
-        tab.add(zhihuDownloadFram, text = "知乎下载")
-
-        videoDownloadFram = tkinter.Frame(tab)
-        tab.add(videoDownloadFram, text = "视频下载")
-
         pdfMergeFram = tkinter.Frame(tab)
         tab.add(pdfMergeFram, text = "PDF合并")
+
+        # zhihuDownloadFram = tkinter.Frame(tab)
+        # tab.add(zhihuDownloadFram, text = "知乎下载")
+
+        # videoDownloadFram = tkinter.Frame(tab)
+        # tab.add(videoDownloadFram, text = "视频下载")
         
         aboutFram = tkinter.Frame(tab)
         tab.add(aboutFram, text = "关于")
@@ -94,6 +95,7 @@ class Application(object):
         window.protocol("WM_DELETE_WINDOW", on_closing)
 
         MarkUrlDownloadGui(urlDownloadFram)
+        PdfMergeGui(pdfMergeFram)
         About(aboutFram)
 
         # ---------主窗口循环显示---------

@@ -62,6 +62,11 @@ class MarkWebDownload(object):
                 htmlTitle = soup.title.string
                 if(htmlTitle == '\n'): # 例如微信文章
                     htmlTitle = re.findall(r'<meta property=\"og:title\" content=\"(.*?)\"', htmlCont)[0] #用?来控制正则贪婪和非贪婪匹配;(.*?) 小括号来控制是否包含匹配的关键字  
+
+                markLink = "* [{}]({})\n".format(htmlTitle, url)
+                self.insert(savePath+"/link.md", markLink)
+                # return # 仅保存markdown格式的标题链接。
+
                 nowTime = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
                 htmlTitle = nowTime+'_'+htmlTitle
                 special_flag = ['(', ')', '|', ' ', '/', '*', '\\', '.', '<', '>', '&', '?', ':', ',', ';', '"', '\'', '`']
@@ -109,6 +114,7 @@ class MarkWebDownload(object):
         fd = open(htmlPath, 'w', encoding="utf-8")
         fd.write(htmlCont)
         fd.close()
+
         return htmlPath
 
     def open_url(self, url_str):
@@ -173,3 +179,17 @@ class MarkWebDownload(object):
             print("get url Exception：" + url)
             print(e)
         return contLen
+
+    def insert(self, fileName, msg_info):
+        """
+        数据插入到文件中
+        :param msg_info:
+        :return:
+        """
+        fileDir = os.path.dirname(fileName)
+        if not (os.path.isdir(fileDir)):
+            os.makedirs(fileDir)
+
+        fh = open(fileName, 'a+', encoding='utf-8')
+        fh.write(msg_info)
+        fh.close()
